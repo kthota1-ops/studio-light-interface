@@ -37,7 +37,7 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
           
           {/* Brand Text */}
           <div className="flex items-baseline">
-            <span className="text-sm font-bold text-foreground tracking-tight">Pixelcut</span>
+            <span className="text-sm font-bold text-foreground tracking-tight">PixelCut</span>
             <span className="text-sm font-medium text-primary ml-0.5">AI</span>
           </div>
         </motion.div>
