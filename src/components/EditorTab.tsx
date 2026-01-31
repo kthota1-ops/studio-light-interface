@@ -5,7 +5,7 @@ import OperationQueue from "./editor/OperationQueue";
 
 const EditorTab = () => {
   return (
-    <div className="h-[calc(100vh-4rem-2rem)] flex gap-4 p-4 pb-12">
+    <div className="h-[calc(100vh-5rem)] flex gap-4 p-4 pt-24">
       {/* Left Panel - AI Liaison (22%) */}
       <motion.div 
         className="w-[22%] flex-shrink-0"
