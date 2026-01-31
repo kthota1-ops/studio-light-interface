@@ -26,7 +26,7 @@ const LobbyTab = () => {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center relative overflow-hidden pb-16">
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center relative overflow-hidden pb-16 pt-28">
       {/* Ambient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Gradient Orbs */}
