@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import SegmentedControl from "./SegmentedControl";
+import ThemeToggle from "./ThemeToggle";
 
 type TabType = "lobby" | "editor" | "studio";
 
@@ -13,7 +14,7 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
     <header className="fixed top-0 left-0 right-0 h-20 z-50 flex items-center justify-center px-6">
       {/* Single Glass Pill Container */}
       <motion.div 
-        className="flex items-center gap-6 px-4 py-2.5 rounded-full bg-background/70 backdrop-blur-2xl border border-border/50 shadow-soft-lg"
+        className="flex items-center gap-5 px-4 py-2.5 rounded-full bg-background/70 backdrop-blur-2xl border border-border/50 shadow-soft-lg"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -22,7 +23,7 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
         <div className="flex items-center gap-3 pl-2">
           {/* Logo */}
           <div className="relative w-7 h-7 bg-primary rounded-lg flex items-center justify-end pr-1 pt-1">
-            <div className="w-1.5 h-1.5 bg-background rounded-full" />
+            <div className="w-1.5 h-1.5 bg-primary-foreground rounded-full" />
           </div>
           
           {/* Brand Text */}
@@ -41,8 +42,11 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
         {/* Divider */}
         <div className="w-px h-6 bg-border/60" />
 
-        {/* System Status */}
+        {/* System Status & Controls */}
         <div className="flex items-center gap-3 pr-2">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Ready Badge */}
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10">
             <motion.div 
