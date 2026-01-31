@@ -76,25 +76,63 @@
   }
 
   .dark {
-    --background: 222 47% 6%;
+    /* Core Palette - Studio Dark */
+    --background: 224 30% 6%;
     --foreground: 210 40% 98%;
-    --card: 222 47% 8%;
+    
+    /* Surface Colors */
+    --card: 224 30% 8%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 8%;
+    --popover: 224 30% 8%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
+    
+    /* Royal Blue Accent - slightly brighter in dark */
+    --primary: 217 91% 65%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
+    --primary-glow: 217 91% 75%;
+    --primary-soft: 217 50% 15%;
+    
+    /* Dark Grays */
+    --secondary: 224 20% 12%;
+    --secondary-foreground: 210 40% 90%;
+    --muted: 224 20% 14%;
+    --muted-foreground: 215 15% 55%;
+    
+    /* Accent & States */
+    --accent: 224 20% 14%;
+    --accent-foreground: 217 91% 70%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 212 27% 84%;
+    
+    /* Structural */
+    --border: 224 20% 18%;
+    --border-subtle: 224 20% 12%;
+    --input: 224 20% 14%;
+    --ring: 217 91% 65%;
+    
+    /* Success */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Glass Effects - darker */
+    --glass-bg: 224 30% 8% / 0.8;
+    --glass-border: 224 20% 20% / 0.5;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 40px -10px hsl(217 91% 65% / 0.4);
+    
+    /* Sidebar */
+    --sidebar-background: 224 30% 8%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 217 91% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 224 20% 14%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 224 20% 18%;
+    --sidebar-ring: 217 91% 65%;
   }
 }
 
@@ -138,7 +176,7 @@
   }
 
   .glass-heavy {
-    background: hsl(0 0% 100% / 0.85);
+    background: hsl(var(--background) / 0.85);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
     border-bottom: 1px solid hsl(var(--border-subtle));
