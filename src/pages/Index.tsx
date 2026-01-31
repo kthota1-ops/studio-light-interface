@@ -16,7 +16,7 @@ const Index = () => {
       <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Main Stage */}
-      <main className="pt-16">
+      <main>
         <AnimatePresence mode="wait">
           {activeTab === "lobby" && (
             <motion.div
@@ -53,20 +53,6 @@ const Index = () => {
           )}
         </AnimatePresence>
       </main>
-
-      {/* Footer Status Bar */}
-      <footer className="fixed bottom-0 left-0 right-0 h-8 glass-heavy flex items-center justify-between px-6 text-xs text-muted-foreground font-mono">
-        <div className="flex items-center gap-6">
-          <span>FPS: 60.0</span>
-          <span className="text-border">|</span>
-          <span>ENGINE: V2.6</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <span>RENDER: GPU</span>
-          <span className="text-border">|</span>
-          <span>LATENCY: 12ms</span>
-        </div>
-      </footer>
     </div>
   );
 };
