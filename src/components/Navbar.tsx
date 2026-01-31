@@ -11,58 +11,78 @@ interface NavbarProps {
 
 const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
   return (
-    <header className="fixed top-0 left-0 right-0 h-20 z-50 flex items-center justify-center px-6">
-      {/* Single Glass Pill Container */}
-      <motion.div 
-        className="flex items-center gap-5 px-4 py-2.5 rounded-full bg-background/70 backdrop-blur-2xl border border-border/50 shadow-soft-lg"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
+    <header className="fixed top-0 left-0 right-0 h-20 z-50 flex items-center justify-center px-4">
+      {/* Floating Glass Navbar */}
+      <motion.nav 
+        className="flex items-center gap-2 p-1.5 rounded-2xl bg-background/60 backdrop-blur-2xl border border-border/40 shadow-lg shadow-foreground/[0.02]"
+        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        {/* Branding */}
-        <div className="flex items-center gap-3 pl-2">
-          {/* Logo */}
-          <div className="relative w-7 h-7 bg-primary rounded-lg flex items-center justify-end pr-1 pt-1">
-            <div className="w-1.5 h-1.5 bg-primary-foreground rounded-full" />
+        {/* Logo Section */}
+        <motion.div 
+          className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          {/* Animated Logo */}
+          <div className="relative w-8 h-8 bg-gradient-to-br from-primary to-indigo-500 rounded-xl flex items-center justify-center overflow-hidden group">
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-tr from-primary/0 via-white/20 to-primary/0"
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+            <div className="relative w-2 h-2 bg-white rounded-full" />
           </div>
           
           {/* Brand Text */}
-          <div className="flex items-baseline gap-0.5">
+          <div className="flex items-baseline">
             <span className="text-sm font-bold text-foreground tracking-tight">Pixelcut</span>
-            <span className="text-sm font-light text-primary">AI</span>
+            <span className="text-sm font-medium text-primary ml-0.5">AI</span>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-border/60" />
+        {/* Separator */}
+        <div className="w-px h-8 bg-gradient-to-b from-transparent via-border to-transparent" />
 
-        {/* Segmented Control - Center */}
+        {/* Segmented Control */}
         <SegmentedControl activeTab={activeTab} onTabChange={onTabChange} />
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-border/60" />
+        {/* Separator */}
+        <div className="w-px h-8 bg-gradient-to-b from-transparent via-border to-transparent" />
 
-        {/* System Status & Controls */}
-        <div className="flex items-center gap-3 pr-2">
+        {/* Right Section */}
+        <div className="flex items-center gap-1.5 px-1">
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Ready Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10">
-            <motion.div 
-              className="w-1.5 h-1.5 rounded-full bg-success"
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <span className="text-[10px] font-medium text-success">Ready</span>
-          </div>
+          {/* Status Indicator */}
+          <motion.div 
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-success/5 border border-success/10"
+            whileHover={{ scale: 1.02 }}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+            </span>
+            <span className="text-xs font-medium text-success">Live</span>
+          </motion.div>
 
           {/* Profile */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center">
-            <span className="text-[10px] font-semibold text-primary-foreground">JD</span>
-          </div>
+          <motion.button 
+            className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center overflow-hidden group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100"
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            />
+            <span className="relative text-xs font-bold text-white">JD</span>
+          </motion.button>
         </div>
-      </motion.div>
+      </motion.nav>
     </header>
   );
 };
