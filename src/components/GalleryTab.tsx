@@ -109,7 +109,7 @@ const GalleryTab = () => {
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Video Section - 3 cols */}
           <motion.div 
-            className="lg:col-span-3 space-y-4"
+            className="lg:col-span-3 flex flex-col gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -264,7 +264,7 @@ const GalleryTab = () => {
             </div>
 
             {/* Developer Credits */}
-            <div className="mt-4 p-4 rounded-2xl bg-secondary/30 border border-border/50">
+            <div className="mt-auto p-4 rounded-2xl bg-secondary/30 border border-border/50">
               <p className="text-xs text-muted-foreground text-center mb-3">Built by</p>
               <div className="flex items-center justify-center gap-6">
                 {developers.map((dev, index) => (
