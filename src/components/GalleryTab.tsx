@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+const developers = [
+  { name: "Developer 1", avatar: "/placeholder.svg" },
+  { name: "Developer 2", avatar: "/placeholder.svg" },
+  { name: "Developer 3", avatar: "/placeholder.svg" },
+  { name: "Developer 4", avatar: "/placeholder.svg" },
+];
 
 const GalleryTab = () => {
   const [selectedFormat, setSelectedFormat] = useState("MP4");
@@ -252,6 +260,24 @@ const GalleryTab = () => {
                     Download
                   </Button>
                 </div>
+              </div>
+            </div>
+
+            {/* Developer Credits */}
+            <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
+              <p className="text-xs text-muted-foreground text-center mb-3">Built by</p>
+              <div className="flex items-center justify-center gap-6">
+                {developers.map((dev, index) => (
+                  <div key={index} className="flex flex-col items-center gap-1.5">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={dev.avatar} alt={dev.name} />
+                      <AvatarFallback className="text-xs">
+                        {dev.name.split(" ").map(n => n[0]).join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs font-medium text-foreground">{dev.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </motion.div>
