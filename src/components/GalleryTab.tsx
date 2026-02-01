@@ -302,19 +302,19 @@ const GalleryTab = () => {
                 </span>
               </div>
 
-              {/* Waveform */}
-              <div className="h-10 flex items-center justify-center gap-[2px] mb-3 p-2 rounded-xl bg-background/50 border border-border/30">
-                {waveformBars.slice(0, 32).map((bar, i) => (
+              {/* Waveform - evenly distributed across full width */}
+              <div className="h-12 flex items-center justify-between mb-3 p-3 rounded-xl bg-background/50 border border-border/30">
+                {waveformBars.map((bar, i) => (
                   <motion.div
                     key={bar.id}
-                    className="w-1 bg-primary/60 rounded-full"
+                    className="w-[3px] bg-primary/60 rounded-full"
                     animate={{ 
-                      height: [bar.height * 0.2, bar.height * 0.6, bar.height * 0.2],
+                      height: [bar.height * 0.2, bar.height * 0.7, bar.height * 0.2],
                     }}
                     transition={{
                       duration: 1.5,
                       repeat: Infinity,
-                      delay: i * 0.03,
+                      delay: i * 0.02,
                       ease: "easeInOut",
                     }}
                   />
