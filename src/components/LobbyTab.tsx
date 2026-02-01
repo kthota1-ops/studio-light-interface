@@ -1,8 +1,69 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
+import { Slider } from "@/components/ui/slider";
+import { Play, Pause, X } from "lucide-react";
+
+const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-matroska'];
+
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
 
 const LobbyTab = () => {
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanup blob URL on unmount or when video changes
+  useEffect(() => {
+    return () => {
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+      }
+    };
+  }, [videoUrl]);
+
+  const handleFileSelect = (file: File) => {
+    if (!ACCEPTED_VIDEO_TYPES.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a video file (MP4, MOV, AVI, WebM, MKV)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Revoke previous URL if exists
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl);
+    }
+
+    const url = URL.createObjectURL(file);
+    setSelectedVideo(file);
+    setVideoUrl(url);
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -16,6 +77,58 @@ const LobbyTab = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const togglePlayPause = () => {
+    if (!videoRef.current) return;
+    
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (!videoRef.current) return;
+    videoRef.current.currentTime = value[0];
+    setCurrentTime(value[0]);
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  const handleVideoEnded = () => {
+    setIsPlaying(false);
+  };
+
+  const clearVideo = () => {
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl);
+    }
+    setSelectedVideo(null);
+    setVideoUrl(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const features = [
@@ -27,6 +140,15 @@ const LobbyTab = () => {
 
   return (
     <div className="h-[calc(100vh-5rem)] overflow-hidden relative pt-20">
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska"
+        onChange={handleFileInputChange}
+        className="hidden"
+      />
+
       {/* Ambient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 -left-32 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
@@ -83,7 +205,10 @@ const LobbyTab = () => {
 
           {/* Quick Actions */}
           <div className="flex items-center gap-2 mt-5">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <button 
+              onClick={handleBrowseClick}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="17 8 12 3 7 8" />
@@ -117,12 +242,14 @@ const LobbyTab = () => {
           </div>
         </motion.div>
 
-        {/* Right Column - Drop Zone */}
+        {/* Right Column - Drop Zone or Video Preview */}
         <motion.div
           className={`relative aspect-square max-w-sm mx-auto w-full rounded-[28px] transition-all duration-500 ${
-            isDragging 
-              ? "bg-primary/5 border-2 border-primary shadow-glow scale-[1.02]" 
-              : "bg-gradient-to-br from-secondary/60 to-secondary/30 border border-border/50"
+            videoUrl 
+              ? "bg-black border border-border/50"
+              : isDragging 
+                ? "bg-primary/5 border-2 border-primary shadow-glow scale-[1.02]" 
+                : "bg-gradient-to-br from-secondary/60 to-secondary/30 border border-border/50"
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -130,60 +257,134 @@ const LobbyTab = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          whileHover={{ scale: 1.01 }}
+          whileHover={!videoUrl ? { scale: 1.01 } : {}}
         >
-          {/* Inner Glow */}
-          <div className={`absolute inset-0 rounded-[28px] transition-opacity duration-500 ${isDragging ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="absolute inset-0 rounded-[28px] bg-gradient-to-b from-primary/10 to-transparent" />
-          </div>
+          {videoUrl ? (
+            /* Video Preview Player */
+            <div className="absolute inset-0 flex flex-col">
+              {/* Video Element */}
+              <div className="flex-1 relative overflow-hidden rounded-t-[28px]">
+                <video
+                  ref={videoRef}
+                  src={videoUrl}
+                  className="w-full h-full object-contain bg-black"
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onEnded={handleVideoEnded}
+                  onClick={togglePlayPause}
+                />
+                
+                {/* Play/Pause Overlay */}
+                <motion.button
+                  className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity"
+                  onClick={togglePlayPause}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-background/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                    {isPlaying ? (
+                      <Pause className="w-6 h-6 text-foreground" />
+                    ) : (
+                      <Play className="w-6 h-6 text-foreground ml-1" />
+                    )}
+                  </div>
+                </motion.button>
 
-          {/* Animated Rings */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`relative w-28 h-28 transition-transform duration-500 ${isDragging ? "scale-110" : ""}`}>
-              <motion.div 
-                className="absolute inset-0 rounded-full border-2 border-primary/20"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              />
-              <motion.div 
-                className="absolute inset-4 rounded-full border border-primary/30"
-                animate={{ rotate: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              />
-              <motion.div 
-                className="absolute inset-8 rounded-full border border-primary/40"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              />
-              <motion.div 
-                className="absolute inset-0 m-auto w-8 h-8 rounded-full bg-gradient-to-br from-primary to-indigo-500"
-                animate={{ 
-                  scale: isDragging ? [1, 1.3, 1] : [1, 1.1, 1],
-                  opacity: [0.8, 1, 0.8]
-                }}
-                transition={{ duration: isDragging ? 0.6 : 2, repeat: Infinity }}
-              />
-              <div className="absolute inset-0 m-auto w-8 h-8 rounded-full bg-primary/50 blur-xl" />
+                {/* Close Button */}
+                <button
+                  onClick={clearVideo}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-black/80 transition-colors"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
+              </div>
+
+              {/* Controls */}
+              <div className="p-4 bg-gradient-to-t from-black/80 to-black/40 rounded-b-[28px]">
+                {/* Seek Bar */}
+                <Slider
+                  value={[currentTime]}
+                  max={duration || 100}
+                  step={0.1}
+                  onValueChange={handleSeek}
+                  className="mb-3"
+                />
+                
+                {/* Time Display & Controls */}
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={togglePlayPause}
+                    className="w-10 h-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-4 h-4 text-primary-foreground" />
+                    ) : (
+                      <Play className="w-4 h-4 text-primary-foreground ml-0.5" />
+                    )}
+                  </button>
+                  
+                  <div className="text-xs text-white/80 font-mono">
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Drop Zone */
+            <>
+              {/* Inner Glow */}
+              <div className={`absolute inset-0 rounded-[28px] transition-opacity duration-500 ${isDragging ? 'opacity-100' : 'opacity-0'}`}>
+                <div className="absolute inset-0 rounded-[28px] bg-gradient-to-b from-primary/10 to-transparent" />
+              </div>
 
-          {/* Drop Zone Content */}
-          <div className="absolute inset-x-0 bottom-6 flex flex-col items-center">
-            <motion.div className="text-center" animate={{ y: isDragging ? -3 : 0 }}>
-              <p className={`text-sm font-medium transition-colors duration-300 ${
-                isDragging ? "text-primary" : "text-foreground"
-              }`}>
-                {isDragging ? "Release to upload" : "Drop your video here"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">MP4, MOV, AVI up to 4GB</p>
-            </motion.div>
-          </div>
+              {/* Animated Rings */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className={`relative w-28 h-28 transition-transform duration-500 ${isDragging ? "scale-110" : ""}`}>
+                  <motion.div 
+                    className="absolute inset-0 rounded-full border-2 border-primary/20"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div 
+                    className="absolute inset-4 rounded-full border border-primary/30"
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div 
+                    className="absolute inset-8 rounded-full border border-primary/40"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div 
+                    className="absolute inset-0 m-auto w-8 h-8 rounded-full bg-gradient-to-br from-primary to-indigo-500"
+                    animate={{ 
+                      scale: isDragging ? [1, 1.3, 1] : [1, 1.1, 1],
+                      opacity: [0.8, 1, 0.8]
+                    }}
+                    transition={{ duration: isDragging ? 0.6 : 2, repeat: Infinity }}
+                  />
+                  <div className="absolute inset-0 m-auto w-8 h-8 rounded-full bg-primary/50 blur-xl" />
+                </div>
+              </div>
 
-          {/* Corner Accents */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-l-2 border-t-2 border-border/40 rounded-tl-lg" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-r-2 border-t-2 border-border/40 rounded-tr-lg" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-l-2 border-b-2 border-border/40 rounded-bl-lg" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-r-2 border-b-2 border-border/40 rounded-br-lg" />
+              {/* Drop Zone Content */}
+              <div className="absolute inset-x-0 bottom-6 flex flex-col items-center">
+                <motion.div className="text-center" animate={{ y: isDragging ? -3 : 0 }}>
+                  <p className={`text-sm font-medium transition-colors duration-300 ${
+                    isDragging ? "text-primary" : "text-foreground"
+                  }`}>
+                    {isDragging ? "Release to upload" : "Drop your video here"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">MP4, MOV, AVI up to 4GB</p>
+                </motion.div>
+              </div>
+
+              {/* Corner Accents */}
+              <div className="absolute top-3 left-3 w-4 h-4 border-l-2 border-t-2 border-border/40 rounded-tl-lg" />
+              <div className="absolute top-3 right-3 w-4 h-4 border-r-2 border-t-2 border-border/40 rounded-tr-lg" />
+              <div className="absolute bottom-3 left-3 w-4 h-4 border-l-2 border-b-2 border-border/40 rounded-bl-lg" />
+              <div className="absolute bottom-3 right-3 w-4 h-4 border-r-2 border-b-2 border-border/40 rounded-br-lg" />
+            </>
+          )}
         </motion.div>
       </div>
     </div>
