@@ -32,78 +32,151 @@ const VideoCanvas = () => {
   };
 
   const currentTime = (playheadPosition / 100) * 154;
+  const progressPercent = (currentTime / 154) * 100;
 
   return (
     <div className="h-full flex flex-col gap-3">
-      {/* Video Player */}
-      <div className="flex-1 relative bg-foreground rounded-2xl overflow-hidden border border-border/50 shadow-lg">
-        {/* Video Placeholder */}
-        <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground to-foreground/90" />
+      {/* Video Player - Premium Design */}
+      <div className="flex-1 relative group">
+        {/* Hover Glow Effect */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 via-primary/30 to-primary/50 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        
+        {/* Main Video Container */}
+        <div className="relative h-full bg-foreground rounded-2xl overflow-hidden border border-border/50 shadow-2xl">
+          {/* Video Placeholder */}
+          <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground to-foreground/90" />
 
-        {/* Top Bar */}
-        <div className="absolute top-0 left-0 right-0 p-3 flex items-center justify-between bg-gradient-to-b from-black/40 to-transparent">
-          <div className="flex items-center gap-2">
-            <div className="px-2 py-1 rounded-md bg-black/30 backdrop-blur-sm">
-              <span className="text-[10px] font-mono text-white/80">{formatTime(currentTime)}</span>
+          {/* Scanlines Overlay */}
+          <div 
+            className="absolute inset-0 pointer-events-none opacity-[0.03]"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)',
+            }}
+          />
+
+          {/* Top Bar */}
+          <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent">
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
+                <span className="text-xs font-mono text-white/90">{formatTime(currentTime)}</span>
+              </div>
+              <div className="px-3 py-1.5 rounded-lg bg-primary/90 backdrop-blur-md">
+                <span className="text-xs font-semibold text-white">1080p</span>
+              </div>
+              <div className="px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
+                <span className="text-xs font-medium text-white/80">30fps</span>
+              </div>
             </div>
-            <div className="px-2 py-1 rounded-md bg-primary/80 backdrop-blur-sm">
-              <span className="text-[10px] font-medium text-white">1080p</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-destructive/80 backdrop-blur-md">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                <span className="text-xs font-semibold text-white">Recording</span>
+              </div>
+              <div className="px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
+                <span className="text-xs font-mono text-white/90">02:34:00</span>
+              </div>
             </div>
           </div>
-          <div className="px-2 py-1 rounded-md bg-black/30 backdrop-blur-sm">
-            <span className="text-[10px] font-mono text-white/80">02:34:00</span>
-          </div>
-        </div>
 
-        {/* Center Play Button */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <motion.button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors border border-white/10"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isPlaying ? (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                <rect x="6" y="4" width="4" height="16" rx="1" />
-                <rect x="14" y="4" width="4" height="16" rx="1" />
-              </svg>
-            ) : (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                <polygon points="6 3 20 12 6 21 6 3" />
-              </svg>
-            )}
-          </motion.button>
-        </div>
-
-        {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between bg-gradient-to-t from-black/40 to-transparent">
-          <div className="flex items-center gap-2">
-            <motion.button 
-              className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20"
-              whileHover={{ scale: 1.05 }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-                <polygon points="19 20 9 12 19 4 19 20" />
-                <line x1="5" y1="19" x2="5" y2="5" stroke="white" strokeWidth="2" />
-              </svg>
-            </motion.button>
-            <motion.button 
-              className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20"
-              whileHover={{ scale: 1.05 }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-                <polygon points="5 4 15 12 5 20 5 4" />
-                <line x1="19" y1="5" x2="19" y2="19" stroke="white" strokeWidth="2" />
-              </svg>
-            </motion.button>
+          {/* Center Play Button */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="relative">
+              {/* Ping Animation */}
+              <div className="absolute inset-0 w-20 h-20 rounded-full bg-white/20 animate-ping" style={{ animationDuration: '2s' }} />
+              <motion.button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="relative w-20 h-20 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center hover:bg-white/20 transition-all duration-300 border border-white/20 shadow-2xl"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {isPlaying ? (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                  </svg>
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="white" className="ml-1">
+                    <polygon points="6 3 20 12 6 21 6 3" />
+                  </svg>
+                )}
+              </motion.button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/20 backdrop-blur-sm border border-success/30">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-            </span>
-            <span className="text-[10px] text-success font-medium">AI Processing</span>
+
+          {/* Bottom Controls */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent">
+            {/* Progress Bar */}
+            <div className="px-4 pt-4">
+              <div className="relative h-1 bg-white/20 rounded-full overflow-hidden cursor-pointer group/progress"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  setPlayheadPosition((x / rect.width) * 100);
+                }}
+              >
+                <div 
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all"
+                  style={{ width: `${progressPercent}%` }}
+                />
+                <div 
+                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover/progress:opacity-100 transition-opacity"
+                  style={{ left: `${progressPercent}%`, transform: 'translate(-50%, -50%)' }}
+                />
+              </div>
+            </div>
+
+            {/* Controls Row */}
+            <div className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <motion.button 
+                  className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all border border-white/10"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                    <polygon points="19 20 9 12 19 4 19 20" />
+                    <line x1="5" y1="19" x2="5" y2="5" stroke="white" strokeWidth="2" />
+                  </svg>
+                </motion.button>
+                <motion.button 
+                  className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all border border-white/10"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                    <polygon points="5 4 15 12 5 20 5 4" />
+                    <line x1="19" y1="5" x2="19" y2="19" stroke="white" strokeWidth="2" />
+                  </svg>
+                </motion.button>
+                <motion.button 
+                  className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all border border-white/10"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                </motion.button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-success/20 backdrop-blur-md border border-success/30">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                  </span>
+                  <span className="text-xs text-success font-semibold">AI Processing</span>
+                </div>
+                <motion.button 
+                  className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all border border-white/10"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                  </svg>
+                </motion.button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
