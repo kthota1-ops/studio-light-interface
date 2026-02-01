@@ -264,7 +264,7 @@ const GalleryTab = () => {
             </div>
 
             {/* Developer Credits */}
-            <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
+            <div className="mt-4 p-4 rounded-2xl bg-secondary/30 border border-border/50">
               <p className="text-xs text-muted-foreground text-center mb-3">Built by</p>
               <div className="flex items-center justify-center gap-6">
                 {developers.map((dev, index) => (
