@@ -1,68 +1,103 @@
 
-# Improve Editor Tab Video Player Design
+# Video Upload and Preview for Lobby Page
 
 ## Overview
-Upgrade the video player in `VideoCanvas.tsx` to match the premium design of the Studio/Gallery tab video player, including glow effects, scanlines, better overlays, and refined controls.
+Add full video upload functionality to the Lobby page with file browsing, drag-and-drop, and a seamless local video preview player.
 
-## Key Design Elements to Add
+## Features to Implement
 
-### 1. Hover Glow Effect
-Add a gradient glow that appears when hovering over the video player container, creating a premium interactive feel.
+### 1. File Browse Button
+- Connect "Browse Files" button to a hidden file input
+- Accept only video formats: `.mp4, .mov, .avi, .webm, .mkv`
+- Trigger file picker on button click
 
-### 2. Scanlines Effect
-Add subtle scanlines overlay for a polished video player aesthetic.
+### 2. Drag and Drop Enhancement
+- Validate dropped files are video format
+- Show error toast if non-video file is dropped
+- Extract the video file from the drop event
 
-### 3. Enhanced Play Button
-- Larger size (w-20 h-20 instead of w-16 h-16)
-- Add ping animation effect behind the button
-- Better backdrop blur styling
+### 3. Local Video Playback (No Buffering)
+- Use `URL.createObjectURL()` to create a local blob URL
+- This plays the video directly from memory - no network streaming
+- Video loads instantly and scrubs smoothly without buffering
 
-### 4. Improved Top Overlay
-- Stronger gradient (from-black/60)
-- Better badge styling matching Studio page
-- Add "Recording" or status indicator similar to "Mastered" badge
+### 4. Video Preview UI
+When a video is selected, the drop zone transforms into a video player with:
+- Video element with the local blob URL
+- Play/Pause button (centered, large)
+- Progress/seek bar (draggable to scrub)
+- Current time / Duration display
+- Close/Remove button to clear the video and return to drop zone
 
-### 5. Enhanced Bottom Controls
-- Add animated progress bar with gradient
-- Better control button styling
-- Add video metadata (resolution, fps)
-- Improve the AI Processing indicator placement
-
-### 6. Overall Polish
-- Change border radius to `rounded-2xl` for inner container
-- Add `shadow-2xl` for depth
-- Wrap in a `group` class for hover interactions
+### 5. Clean Design Integration
+- Smooth transition from drop zone to video preview
+- Match the existing design language (rounded corners, gradients, animations)
+- Keep the same aspect ratio container
 
 ## Technical Implementation
 
-### File to Modify
-`src/components/editor/VideoCanvas.tsx`
+### State Management
+```typescript
+const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
+const [videoUrl, setVideoUrl] = useState<string | null>(null);
+const [isPlaying, setIsPlaying] = useState(false);
+const [currentTime, setCurrentTime] = useState(0);
+const [duration, setDuration] = useState(0);
+const videoRef = useRef<HTMLVideoElement>(null);
+const fileInputRef = useRef<HTMLInputElement>(null);
+```
 
-### Changes Summary
+### Key Functions
+1. `handleFileSelect(file: File)` - Validates and sets the video file
+2. `handleBrowseClick()` - Triggers the hidden file input
+3. `handleDrop(e)` - Processes dropped files
+4. `togglePlayPause()` - Controls video playback
+5. `handleSeek(value)` - Updates video currentTime for scrubbing
+6. `clearVideo()` - Removes video and revokes blob URL
 
-1. **Container Structure** - Wrap video player in a relative container with glow effect div
-2. **Scanlines Overlay** - Add repeating-linear-gradient background
-3. **Play Button** - Increase size, add ping animation div
-4. **Top Bar** - Use stronger gradient, improve badge styling, add status badge
-5. **Bottom Bar** - Add progress bar, improve control layout, add metadata
-6. **Styling Updates** - Apply `rounded-2xl`, `shadow-2xl`, `group` class
+### Video Format Validation
+```typescript
+const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-matroska'];
+```
 
-### Visual Comparison
+### Blob URL Management
+- Create blob URL when video is selected: `URL.createObjectURL(file)`
+- Revoke blob URL when video is cleared to free memory: `URL.revokeObjectURL(url)`
+- Use `useEffect` cleanup to handle component unmount
 
-**Before (Current Editor):**
-- Simple dark background
-- Basic overlays with `from-black/40`
-- Small play button (w-16 h-16)
-- No progress bar
-- No glow effects
+### Video Player Controls
+- Slider component for seek bar (already have `@radix-ui/react-slider`)
+- `onTimeUpdate` event to sync progress bar with video
+- `onLoadedMetadata` to get video duration
+- Click on seek bar updates `videoRef.current.currentTime`
 
-**After (Matching Studio):**
-- Glow effect on hover
-- Scanlines texture
-- Large play button with animation (w-20 h-20)
-- Animated gradient progress bar
-- Premium overlays with `from-black/60`
-- Video metadata display
-- Overall more polished appearance
+## File Changes
 
-The timeline section below the video player will remain unchanged to maintain the editing workflow functionality.
+### `src/components/LobbyTab.tsx`
+- Add refs for video element and file input
+- Add state for video file, URL, playback status, time tracking
+- Add hidden `<input type="file" accept="video/*" />` element
+- Update `handleDrop` to extract and validate video files
+- Add `handleBrowseClick` to trigger file input
+- Create conditional render: drop zone OR video preview
+- Add video player UI with controls when video is selected
+
+## UI Flow
+
+```
+[Drop Zone / Browse Button]
+         |
+         v (file selected)
+[Video Preview Player]
+  - Video display
+  - Play/Pause button
+  - Seek bar (draggable)
+  - Time display
+  - Close button
+```
+
+## Performance Considerations
+- Blob URLs load instantly from local memory
+- No network requests = no buffering
+- Seeking is instantaneous since the entire file is in memory
+- Clean up blob URLs to prevent memory leaks
