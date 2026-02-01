@@ -1,60 +1,68 @@
 
-# Add Developer Credits Section to Studio Tab
+# Improve Editor Tab Video Player Design
 
 ## Overview
-Add a team/credits section below the export controls (Download, Share, Quality buttons) showcasing the 4 developers who built the product with avatars and name tags.
+Upgrade the video player in `VideoCanvas.tsx` to match the premium design of the Studio/Gallery tab video player, including glow effects, scanlines, better overlays, and refined controls.
 
-## Design Approach
-- Place the section directly below the export controls panel
-- Use a subtle, cohesive design that matches the existing card styling
-- Display 4 circular avatar placeholders with names underneath
-- Include a small header like "Built by" or "Made with love by"
+## Key Design Elements to Add
+
+### 1. Hover Glow Effect
+Add a gradient glow that appears when hovering over the video player container, creating a premium interactive feel.
+
+### 2. Scanlines Effect
+Add subtle scanlines overlay for a polished video player aesthetic.
+
+### 3. Enhanced Play Button
+- Larger size (w-20 h-20 instead of w-16 h-16)
+- Add ping animation effect behind the button
+- Better backdrop blur styling
+
+### 4. Improved Top Overlay
+- Stronger gradient (from-black/60)
+- Better badge styling matching Studio page
+- Add "Recording" or status indicator similar to "Mastered" badge
+
+### 5. Enhanced Bottom Controls
+- Add animated progress bar with gradient
+- Better control button styling
+- Add video metadata (resolution, fps)
+- Improve the AI Processing indicator placement
+
+### 6. Overall Polish
+- Change border radius to `rounded-2xl` for inner container
+- Add `shadow-2xl` for depth
+- Wrap in a `group` class for hover interactions
 
 ## Technical Implementation
 
 ### File to Modify
-`src/components/GalleryTab.tsx`
+`src/components/editor/VideoCanvas.tsx`
 
-### Changes
-1. **Add Developer Data Array** - Create a constant array with placeholder data for 4 developers:
-   ```text
-   const developers = [
-     { name: "Developer 1", avatar: "/placeholder.svg" },
-     { name: "Developer 2", avatar: "/placeholder.svg" },
-     { name: "Developer 3", avatar: "/placeholder.svg" },
-     { name: "Developer 4", avatar: "/placeholder.svg" },
-   ];
-   ```
+### Changes Summary
 
-2. **Add Credits Section** - Insert a new card below the export controls panel with:
-   - A subtle header ("Built by" or "Made with love by")
-   - 4 avatar circles using the existing `Avatar` component from shadcn/ui
-   - Name labels below each avatar
-   - Horizontal layout with even spacing
+1. **Container Structure** - Wrap video player in a relative container with glow effect div
+2. **Scanlines Overlay** - Add repeating-linear-gradient background
+3. **Play Button** - Increase size, add ping animation div
+4. **Top Bar** - Use stronger gradient, improve badge styling, add status badge
+5. **Bottom Bar** - Add progress bar, improve control layout, add metadata
+6. **Styling Updates** - Apply `rounded-2xl`, `shadow-2xl`, `group` class
 
-### Component Structure
-```text
-<div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
-  <p className="text-xs text-muted-foreground text-center mb-3">Built by</p>
-  <div className="flex items-center justify-center gap-4">
-    {developers.map((dev) => (
-      <div className="flex flex-col items-center gap-1.5">
-        <Avatar>
-          <AvatarImage src={dev.avatar} />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
-        <span className="text-xs font-medium">{dev.name}</span>
-      </div>
-    ))}
-  </div>
-</div>
-```
+### Visual Comparison
 
-### Location in Layout
-The section will be added after line ~218 (after the export controls div closes), within the `lg:col-span-3` video section column.
+**Before (Current Editor):**
+- Simple dark background
+- Basic overlays with `from-black/40`
+- Small play button (w-16 h-16)
+- No progress bar
+- No glow effects
 
-## Visual Result
-- Matches the existing secondary/30 card styling
-- Avatars will show placeholder images initially (easy to swap with real photos later)
-- Names displayed in small, readable text below each avatar
-- Centered layout with comfortable spacing between developers
+**After (Matching Studio):**
+- Glow effect on hover
+- Scanlines texture
+- Large play button with animation (w-20 h-20)
+- Animated gradient progress bar
+- Premium overlays with `from-black/60`
+- Video metadata display
+- Overall more polished appearance
+
+The timeline section below the video player will remain unchanged to maintain the editing workflow functionality.
