@@ -293,53 +293,45 @@ const GalleryTab = () => {
               </div>
             </div>
 
-            {/* AI Commentary */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/5 to-indigo-500/5 border border-primary/10">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-foreground">AI Analysis</h4>
-                  <p className="text-[10px] text-muted-foreground">Powered by PixelCut AI</p>
-                </div>
+            {/* AI Summary */}
+            <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Summary</h3>
+                <span className="px-2 py-0.5 rounded-md bg-primary/10 text-[10px] font-medium text-primary">
+                  Auto-generated
+                </span>
               </div>
 
               {/* Waveform */}
-              <div className="h-14 flex items-center justify-center gap-[2px] mb-4 px-1">
-                {waveformBars.map((bar, i) => (
+              <div className="h-10 flex items-center justify-center gap-[2px] mb-3 p-2 rounded-xl bg-background/50 border border-border/30">
+                {waveformBars.slice(0, 32).map((bar, i) => (
                   <motion.div
                     key={bar.id}
-                    className="w-1 bg-gradient-to-t from-primary/30 to-primary rounded-full"
+                    className="w-1 bg-primary/60 rounded-full"
                     animate={{ 
-                      height: [bar.height * 0.3, bar.height, bar.height * 0.3],
+                      height: [bar.height * 0.2, bar.height * 0.6, bar.height * 0.2],
                     }}
                     transition={{
                       duration: 1.5,
                       repeat: Infinity,
-                      delay: i * 0.02,
+                      delay: i * 0.03,
                       ease: "easeInOut",
                     }}
                   />
                 ))}
               </div>
 
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                "Excellent pacing detected. Applied 14 intelligent cuts at natural transition points. Audio levels normalized with noise reduction."
+              <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                Excellent pacing detected. Applied 14 intelligent cuts at natural transition points. Audio levels normalized with noise reduction.
               </p>
 
-              <motion.button 
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-indigo-500 text-white text-sm font-medium flex items-center justify-center gap-2 shadow-glow"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="5 3 19 12 5 21 5 3" />
+              <Button variant="outline" size="sm" className="w-full">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
                 </svg>
-                Listen to AI Summary
-              </motion.button>
+                Play Audio Summary
+              </Button>
             </div>
 
             {/* New Project */}
