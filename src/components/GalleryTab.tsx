@@ -264,19 +264,33 @@ const GalleryTab = () => {
             </div>
 
             {/* Developer Credits */}
-            <div className="mt-auto p-4 rounded-2xl bg-secondary/30 border border-border/50">
-              <p className="text-xs text-muted-foreground text-center mb-3">Built by</p>
-              <div className="flex items-center justify-center gap-6">
+            {/* Developer Credits */}
+            <div className="my-auto py-6 px-8 rounded-3xl bg-gradient-to-br from-secondary/40 via-secondary/20 to-transparent backdrop-blur-sm border border-border/30 shadow-lg">
+              <p className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-widest text-center mb-5">
+                Crafted by
+              </p>
+              <div className="flex items-center justify-center gap-8">
                 {developers.map((dev, index) => (
-                  <div key={index} className="flex flex-col items-center gap-1.5">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={dev.avatar} alt={dev.name} />
-                      <AvatarFallback className="text-xs">
-                        {dev.name.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs font-medium text-foreground">{dev.name}</span>
-                  </div>
+                  <motion.div 
+                    key={index} 
+                    className="flex flex-col items-center gap-2 group"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 * index }}
+                  >
+                    <div className="relative">
+                      <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary/20 to-indigo-500/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+                      <Avatar className="h-14 w-14 ring-2 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 relative">
+                        <AvatarImage src={dev.avatar} alt={dev.name} />
+                        <AvatarFallback className="text-sm font-semibold bg-gradient-to-br from-secondary to-secondary/50">
+                          {dev.name.split(" ").map(n => n[0]).join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <span className="text-xs font-medium text-foreground/80 group-hover:text-foreground transition-colors duration-300">
+                      {dev.name}
+                    </span>
+                  </motion.div>
                 ))}
               </div>
             </div>
