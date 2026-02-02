@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  resetPassword: (email: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -106,8 +107,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(CURRENT_USER_KEY);
   };
 
+  const resetPassword = async (email: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const users = getUsers();
+    const normalizedEmail = email.toLowerCase();
+
+    if (!users[normalizedEmail]) {
+      return { success: false, error: "No account found with this email" };
+    }
+
+    if (newPassword.length < 6) {
+      return { success: false, error: "Password must be at least 6 characters" };
+    }
+
+    // Update password
+    users[normalizedEmail].password = newPassword;
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+
+    return { success: true };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, signup, logout, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
