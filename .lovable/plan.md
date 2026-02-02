@@ -1,103 +1,80 @@
 
-# Video Upload and Preview for Lobby Page
+
+# Add Social Login Buttons (Google & GitHub)
 
 ## Overview
-Add full video upload functionality to the Lobby page with file browsing, drag-and-drop, and a seamless local video preview player.
+Add visually consistent social login buttons for Google and GitHub as placeholders in the AuthModal. These buttons will match the existing premium design theme and show a "Coming soon" toast when clicked.
 
-## Features to Implement
+## Design Approach
 
-### 1. File Browse Button
-- Connect "Browse Files" button to a hidden file input
-- Accept only video formats: `.mp4, .mov, .avi, .webm, .mkv`
-- Trigger file picker on button click
+### Button Placement
+- Add social buttons between the mode switcher and the email form
+- Include an "or" divider to separate social login from email/password login
+- Only show on login and signup modes (not on forgot/reset)
 
-### 2. Drag and Drop Enhancement
-- Validate dropped files are video format
-- Show error toast if non-video file is dropped
-- Extract the video file from the drop event
+### Visual Design
+- Match existing button styling with `bg-secondary/50` background
+- Use `rounded-xl` border radius consistent with other elements
+- Add hover states with `hover:bg-secondary/70`
+- Include brand-appropriate icons (Google "G" colors, GitHub dark icon)
+- Height `h-11` to match other form elements
 
-### 3. Local Video Playback (No Buffering)
-- Use `URL.createObjectURL()` to create a local blob URL
-- This plays the video directly from memory - no network streaming
-- Video loads instantly and scrubs smoothly without buffering
-
-### 4. Video Preview UI
-When a video is selected, the drop zone transforms into a video player with:
-- Video element with the local blob URL
-- Play/Pause button (centered, large)
-- Progress/seek bar (draggable to scrub)
-- Current time / Duration display
-- Close/Remove button to clear the video and return to drop zone
-
-### 5. Clean Design Integration
-- Smooth transition from drop zone to video preview
-- Match the existing design language (rounded corners, gradients, animations)
-- Keep the same aspect ratio container
+### User Interaction
+- Clicking either button shows a toast: "Coming soon! This feature will be available shortly."
+- Buttons are not disabled (to feel interactive) but don't perform actual auth
 
 ## Technical Implementation
 
-### State Management
+### File to Modify
+`src/components/AuthModal.tsx`
+
+### Changes
+
+1. **Add click handler for social buttons**
 ```typescript
-const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
-const [videoUrl, setVideoUrl] = useState<string | null>(null);
-const [isPlaying, setIsPlaying] = useState(false);
-const [currentTime, setCurrentTime] = useState(0);
-const [duration, setDuration] = useState(0);
-const videoRef = useRef<HTMLVideoElement>(null);
-const fileInputRef = useRef<HTMLInputElement>(null);
+const handleSocialLogin = (provider: string) => {
+  toast({
+    title: `${provider} login coming soon!`,
+    description: "This feature will be available shortly.",
+  });
+};
 ```
 
-### Key Functions
-1. `handleFileSelect(file: File)` - Validates and sets the video file
-2. `handleBrowseClick()` - Triggers the hidden file input
-3. `handleDrop(e)` - Processes dropped files
-4. `togglePlayPause()` - Controls video playback
-5. `handleSeek(value)` - Updates video currentTime for scrubbing
-6. `clearVideo()` - Removes video and revokes blob URL
+2. **Add social buttons section** (after mode switcher, before form)
+- Two buttons side by side in a flex container
+- Google button with colored "G" icon
+- GitHub button with GitHub icon from lucide-react
+- "or continue with email" divider below
 
-### Video Format Validation
-```typescript
-const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-matroska'];
+3. **Divider styling**
+```tsx
+<div className="flex items-center gap-3">
+  <div className="flex-1 h-px bg-border/50" />
+  <span className="text-xs text-muted-foreground">or</span>
+  <div className="flex-1 h-px bg-border/50" />
+</div>
 ```
 
-### Blob URL Management
-- Create blob URL when video is selected: `URL.createObjectURL(file)`
-- Revoke blob URL when video is cleared to free memory: `URL.revokeObjectURL(url)`
-- Use `useEffect` cleanup to handle component unmount
-
-### Video Player Controls
-- Slider component for seek bar (already have `@radix-ui/react-slider`)
-- `onTimeUpdate` event to sync progress bar with video
-- `onLoadedMetadata` to get video duration
-- Click on seek bar updates `videoRef.current.currentTime`
-
-## File Changes
-
-### `src/components/LobbyTab.tsx`
-- Add refs for video element and file input
-- Add state for video file, URL, playback status, time tracking
-- Add hidden `<input type="file" accept="video/*" />` element
-- Update `handleDrop` to extract and validate video files
-- Add `handleBrowseClick` to trigger file input
-- Create conditional render: drop zone OR video preview
-- Add video player UI with controls when video is selected
-
-## UI Flow
-
+### UI Layout (Login/Signup modes only)
 ```
-[Drop Zone / Browse Button]
-         |
-         v (file selected)
-[Video Preview Player]
-  - Video display
-  - Play/Pause button
-  - Seek bar (draggable)
-  - Time display
-  - Close button
+[Header]
+[Mode Switcher]
+[Google Button] [GitHub Button]  <-- NEW
+[------ or ------]               <-- NEW
+[Email Form Fields]
+[Submit Button]
+[Footer Links]
 ```
 
-## Performance Considerations
-- Blob URLs load instantly from local memory
-- No network requests = no buffering
-- Seeking is instantaneous since the entire file is in memory
-- Clean up blob URLs to prevent memory leaks
+### Icons
+- Google: Custom SVG with brand colors (blue, red, yellow, green "G")
+- GitHub: `Github` icon from lucide-react
+
+## Visual Preview
+
+The social buttons will appear as:
+- Two equal-width buttons side by side
+- Subtle background with border
+- Icon on the left, provider name on the right
+- Smooth hover transition matching other interactive elements
+
