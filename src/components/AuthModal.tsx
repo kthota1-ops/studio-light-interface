@@ -6,37 +6,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Loader2, Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle } from "lucide-react";
 
 interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type AuthMode = "login" | "signup";
+type AuthMode = "login" | "signup" | "forgot" | "reset";
 
 const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [mode, setMode] = useState<AuthMode>("login");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [resetToken, setResetToken] = useState<string | null>(null);
   
   // Form state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   
-  const { login, signup } = useAuth();
+  const { login, signup, resetPassword } = useAuth();
 
   const resetForm = () => {
     setName("");
     setEmail("");
     setPassword("");
+    setConfirmPassword("");
     setShowPassword(false);
+    setResetEmailSent(false);
+    setResetToken(null);
   };
 
   const handleModeSwitch = (newMode: AuthMode) => {
     setMode(newMode);
-    resetForm();
+    if (newMode === "login" || newMode === "signup") {
+      resetForm();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,7 +61,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
         } else {
           toast({ title: "Login failed", description: result.error, variant: "destructive" });
         }
-      } else {
+      } else if (mode === "signup") {
         const result = await signup(name, email, password);
         if (result.success) {
           toast({ title: "Account created!", description: "Welcome to PixelCut AI." });
@@ -62,9 +70,49 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
         } else {
           toast({ title: "Signup failed", description: result.error, variant: "destructive" });
         }
+      } else if (mode === "forgot") {
+        // Simulate sending reset email
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        // Generate mock token
+        const mockToken = Math.random().toString(36).substring(2, 15);
+        setResetToken(mockToken);
+        setResetEmailSent(true);
+        toast({ title: "Reset email sent!", description: "Check your inbox for the reset link." });
+      } else if (mode === "reset") {
+        if (password !== confirmPassword) {
+          toast({ title: "Passwords don't match", description: "Please make sure both passwords are the same.", variant: "destructive" });
+          return;
+        }
+        const result = await resetPassword(email, password);
+        if (result.success) {
+          toast({ title: "Password updated!", description: "You can now sign in with your new password." });
+          handleModeSwitch("login");
+        } else {
+          toast({ title: "Reset failed", description: result.error, variant: "destructive" });
+        }
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case "login": return "Welcome back";
+      case "signup": return "Create account";
+      case "forgot": return resetEmailSent ? "Check your email" : "Reset password";
+      case "reset": return "Set new password";
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (mode) {
+      case "login": return "Sign in to continue editing";
+      case "signup": return "Start creating with PixelCut AI";
+      case "forgot": return resetEmailSent 
+        ? "We've sent a password reset link to your email" 
+        : "Enter your email to receive a reset link";
+      case "reset": return "Choose a strong password for your account";
     }
   };
 
@@ -75,60 +123,91 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
         <div className="relative px-6 pt-8 pb-6 bg-gradient-to-b from-primary/5 to-transparent">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           
-          {/* Logo */}
+          {/* Back Button for forgot/reset modes */}
+          <AnimatePresence>
+            {(mode === "forgot" || mode === "reset") && (
+              <motion.button
+                type="button"
+                onClick={() => handleModeSwitch("login")}
+                className="absolute top-4 left-4 p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+          
+          {/* Logo / Success Icon */}
           <motion.div 
             className="flex items-center justify-center gap-2 mb-4"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
+            key={resetEmailSent ? "success" : "logo"}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-indigo-500 rounded-xl flex items-center justify-center">
-              <div className="w-2.5 h-2.5 bg-white rounded-full" />
-            </div>
+            {resetEmailSent ? (
+              <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-success" />
+              </div>
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-indigo-500 rounded-xl flex items-center justify-center">
+                <div className="w-2.5 h-2.5 bg-white rounded-full" />
+              </div>
+            )}
           </motion.div>
           
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-xl font-bold text-center">
-              {mode === "login" ? "Welcome back" : "Create account"}
+              {getTitle()}
             </DialogTitle>
             <p className="text-sm text-muted-foreground text-center">
-              {mode === "login" 
-                ? "Sign in to continue editing" 
-                : "Start creating with PixelCut AI"}
+              {getSubtitle()}
             </p>
           </DialogHeader>
         </div>
 
-        {/* Mode Switcher */}
-        <div className="px-6 py-3">
-          <div className="flex bg-secondary/50 rounded-xl p-1">
-            <button
-              type="button"
-              onClick={() => handleModeSwitch("login")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                mode === "login"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+        {/* Mode Switcher - only for login/signup */}
+        <AnimatePresence mode="wait">
+          {(mode === "login" || mode === "signup") && (
+            <motion.div 
+              className="px-6 py-3"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
             >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => handleModeSwitch("signup")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                mode === "signup"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
-        </div>
+              <div className="flex bg-secondary/50 rounded-xl p-1">
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch("login")}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                    mode === "login"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch("signup")}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                    mode === "signup"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sign Up
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
           <AnimatePresence mode="wait">
+            {/* Name field - signup only */}
             {mode === "signup" && (
               <motion.div
                 key="name-field"
@@ -156,70 +235,176 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 </div>
               </motion.div>
             )}
+
+            {/* Email field - login, signup, forgot */}
+            {(mode === "login" || mode === "signup" || (mode === "forgot" && !resetEmailSent)) && (
+              <motion.div
+                key="email-field"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">
+                    Email
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 h-11 bg-secondary/30 border-border/50 rounded-xl focus:ring-primary/20"
+                      required
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Password field - login, signup, reset */}
+            {(mode === "login" || mode === "signup" || mode === "reset") && (
+              <motion.div
+                key="password-field"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">
+                    {mode === "reset" ? "New Password" : "Password"}
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10 pr-10 h-11 bg-secondary/30 border-border/50 rounded-xl focus:ring-primary/20"
+                      required
+                      minLength={6}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {(mode === "signup" || mode === "reset") && (
+                    <p className="text-xs text-muted-foreground">At least 6 characters</p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Confirm Password field - reset only */}
+            {mode === "reset" && (
+              <motion.div
+                key="confirm-password-field"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-xs font-medium text-muted-foreground">
+                    Confirm Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="pl-10 h-11 bg-secondary/30 border-border/50 rounded-xl focus:ring-primary/20"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Forgot password link - login only */}
+            {mode === "login" && (
+              <motion.div
+                key="forgot-link"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch("forgot")}
+                  className="text-xs text-primary hover:underline font-medium"
+                >
+                  Forgot password?
+                </button>
+              </motion.div>
+            )}
+
+            {/* Reset email sent - show action buttons */}
+            {mode === "forgot" && resetEmailSent && (
+              <motion.div
+                key="reset-sent-actions"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-3 pt-2"
+              >
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setMode("reset");
+                    setResetEmailSent(false);
+                  }}
+                  className="w-full h-11 rounded-xl font-semibold"
+                  variant="premium"
+                >
+                  I have the code, reset password
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  Didn't receive the email?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setResetEmailSent(false)}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Try again
+                  </button>
+                </p>
+              </motion.div>
+            )}
           </AnimatePresence>
 
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">
-              Email
-            </Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-11 bg-secondary/30 border-border/50 rounded-xl focus:ring-primary/20"
-                required
-              />
-            </div>
-          </div>
+          {/* Submit button - not shown when reset email sent */}
+          {!(mode === "forgot" && resetEmailSent) && (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-11 rounded-xl font-semibold"
+              variant="premium"
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : mode === "login" ? (
+                "Sign In"
+              ) : mode === "signup" ? (
+                "Create Account"
+              ) : mode === "forgot" ? (
+                "Send Reset Link"
+              ) : (
+                "Update Password"
+              )}
+            </Button>
+          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">
-              Password
-            </Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10 h-11 bg-secondary/30 border-border/50 rounded-xl focus:ring-primary/20"
-                required
-                minLength={6}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {mode === "signup" && (
-              <p className="text-xs text-muted-foreground">At least 6 characters</p>
-            )}
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-11 rounded-xl font-semibold"
-            variant="premium"
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : mode === "login" ? (
-              "Sign In"
-            ) : (
-              "Create Account"
-            )}
-          </Button>
-
+          {/* Footer links */}
           {mode === "login" && (
             <p className="text-xs text-center text-muted-foreground">
               Don't have an account?{" "}
@@ -229,6 +414,19 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 className="text-primary hover:underline font-medium"
               >
                 Sign up
+              </button>
+            </p>
+          )}
+
+          {mode === "forgot" && !resetEmailSent && (
+            <p className="text-xs text-center text-muted-foreground">
+              Remember your password?{" "}
+              <button
+                type="button"
+                onClick={() => handleModeSwitch("login")}
+                className="text-primary hover:underline font-medium"
+              >
+                Sign in
               </button>
             </p>
           )}
